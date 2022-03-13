@@ -33,6 +33,7 @@ const account4 = {
   pin: 4444,
 };
 
+//localStorage.setItem('account1', account1);
 const accounts = [account1, account2, account3, account4];
 
 accounts.forEach(function (val) {
@@ -73,6 +74,22 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 // Functions
 
+// Time Out Opacity: 0;
+
+setInterval(() => {
+  containerApp.style.opacity = 0;
+}, 300000);
+
+// /Time Out Opacity: 0;
+
+// /Time Out Close
+
+setInterval(() => {
+  window.location.reload('/');
+}, 300000);
+
+// /Time Out Close
+
 const ekrangaTranzaksiyalarniChiqarish = function (obj) {
   containerMovements.innerHTML = '';
   obj.movements.forEach(function (val, key) {
@@ -101,17 +118,17 @@ let out = 0;
 let komissiya = 0;
 
 const statistika = function (obj) {
-  out = obj.movements
+  sumin = obj.movements
     .filter(function (val) {
-      return val < 0;
+      return val > 0;
     })
     .reduce(function (sumsum, val) {
       return sumsum + val;
     }, 0);
 
-  sumin = obj.movements
+  out = obj.movements
     .filter(function (val) {
-      return val > 0;
+      return val < 0;
     })
     .reduce(function (sumsum, val) {
       return sumsum + val;
@@ -131,8 +148,8 @@ const statistika = function (obj) {
 
 let kirganUser;
 
-btnLogin.addEventListener('click', function (e) {
-  e.preventDefault(); // HTML formadagi default holatlarni o'chirish
+btnLogin.addEventListener('click', function (a) {
+  a.preventDefault(); // HTML formadagi default holatlarni o'chirish
 
   let login = inputLoginUsername.value;
 
@@ -174,10 +191,10 @@ btnLogin.addEventListener('click', function (e) {
 
 // Ekranga transferni chiqarish.
 
-const ekrangaTransferlarniChiqarish = function (obj) {
-  containerMovements.innerHTML = '';
-  obj.movements.forEach(function (val, key) {});
-};
+// const ekrangaTransferlarniChiqarish = function (obj) {
+//   containerMovements.innerHTML = '';
+//   obj.movements.forEach(function (val, key) {});
+// };
 
 // /Ekranga transferni chiqarish.
 
@@ -186,15 +203,41 @@ const ekrangaTransferlarniChiqarish = function (obj) {
 let transferUser;
 
 btnTransfer.addEventListener('click', function (b) {
-  b.preventDefault(); // HTML formadagi default holatlarni o'chirish
+  b.preventDefault();
+  // HTML formadagi default holatlarni o'chirish
 
-  let transferTo = inputTransferTo.value;
+  const transferAmount = Number(inputTransferAmount.value);
 
-  let transferAmount = Number(inputTransferAmount.value);
-
-  transferUser = accounts.find(function (val) {
-    return val.username === transferTo;
+  let transferTo = accounts.find(function (val) {
+    return val.username === inputTransferTo.value;
   });
+  inputTransferAmount.value = inputTransferTo.value = '';
+
+  if (
+    transferAmount > 0 &&
+    sum(kirganUser) >= transferAmount &&
+    inputTransferTo.username !== kirganUser.username
+  ) {
+    // console.log('k');
+    kirganUser.movements.push(-transferAmount);
+    transferTo.movements.push(transferAmount);
+  }
+
+  // console.log(kirganUser.movements);
+
+  // console.log(transferTo);
+
+  ekrangaTranzaksiyalarniChiqarish(kirganUser);
+
+  statistika(kirganUser);
+
+  labelSumIn.textContent = `${sumin} €`;
+
+  labelSumOut.textContent = `${Math.abs(out)} €`;
+
+  labelSumInterest.textContent = `${Math.abs(komissiya)} €`;
+
+  labelBalance.textContent = `${sum(kirganUser)} €`;
 });
 
 // /Transform
@@ -204,7 +247,24 @@ btnTransfer.addEventListener('click', function (b) {
 btnLoan.addEventListener('click', function (b) {
   b.preventDefault();
 
-  let LoanAmount = Number(inputLoanAmount.value);
+  const loanAmount = Number(inputLoanAmount.value);
+
+  let qarzSum = sum(kirganUser) * 0.1;
+
+  if (loanAmount > 0 && qarzSum > loanAmount) {
+    console.log('k');
+    kirganUser.movements.push(loanAmount);
+  }
+
+  ekrangaTranzaksiyalarniChiqarish(kirganUser);
+
+  statistika(kirganUser);
+
+  labelBalance.textContent = `${sum(kirganUser)} €`;
+
+  labelSumIn.textContent = `${sumin} €`;
+
+  inputLoanAmount.value = inputLoanAmount.value = '';
 });
 
 // /Request loan
@@ -214,9 +274,24 @@ btnLoan.addEventListener('click', function (b) {
 btnClose.addEventListener('click', function (b) {
   b.preventDefault();
 
-  let CloseUsername = inputCloseUsername.value;
+  if (
+    inputCloseUsername.value === kirganUser.username &&
+    Number(inputClosePin.value) === kirganUser.pin
+  ) {
+    const close = accounts.findIndex(function (val) {
+      return val.username === kirganUser.username;
+    });
 
-  let ClosePin = Number(inputClosePin.value);
+    console.log(close);
+
+    accounts.splice(close, 1);
+
+    containerApp.style.opacity = 0;
+
+    inputCloseUsername.value = inputCloseUsername.value = '';
+
+    inputClosePin.value = inputClosePin.value = '';
+  }
 });
 
 // /Close account
@@ -235,53 +310,59 @@ const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
 /////////////////////////////////////////////////
 
-//
-//
-//
-//
-//
-//
-//
+//  Time :
 
-// let x = accounts.find(function (val) {
-//   return val.username === 'js';
-// });
+// let date = new Date();
+// let mmb = date.getMinutes();
+// let ssb = date.getSeconds();
 
-// console.log(x);
+// function currentTime() {
+//   let date = new Date();
+//   let mm = date.getMinutes();
+//   let ss = date.getSeconds();
 
-// let arr = [1, 2, 3, 4, 5, 6];
+//   if (mm < 10) {
+//     mm = '0' + mm;
+//   }
 
-// let y = arr.find(function (val) {
-//   return val == 3;
-// });
+//   if (ss < 10) {
+//     ss = '0' + ss;
+//   }
 
-// console.log(y);
+//   let time = `${mm}:${ss}`;
 
-// const obj1 = {
-//   fname: 'Isokov',
-//   lname: 'Jasur',
-//   age: 20,
-//   university: 'TUIT',
-// };
+//   document.getElementById('time').innerText = time;
 
-// const obj2 = {
-//   fname: 'Isokov',
-//   lname: 'Ulugbek',
-//   age: 20,
-//   university: 'TUIT',
-// };
+//   setTimeout(function () {
+//     currentTime();
+//     console.log(new Date().getTime() / 31536000);
+//   }, 1000);
+// }
 
-// const obj3 = {
-//   fname: 'Turdialiyv',
-//   lname: 'Joraqozi',
-//   age: 21,
-//   university: 'TUIT',
-// };
+// currentTime();
 
-// let arr = [obj1, obj2, obj3];
+// /////////////////////////////////////////
 
-// let y = arr.find(function (val) {
-//   return val.fname == 'Isokov';
-// });
+// Secundomer
 
-// console.log(y);
+let min = document.getElementById('min');
+let sec = document.getElementById('sec');
+
+let nullmin = 4;
+let nullsec = 59;
+
+setInterval(() => {
+  min.innerHTML = nullmin;
+  sec.innerHTML = nullsec;
+
+  nullsec--;
+
+  if (nullsec <= 0) {
+    nullmin--;
+    nullsec = 59;
+  } else if (nullmin >= 60) {
+    nullmin--;
+  }
+}, 1000);
+
+// /Secundomer
