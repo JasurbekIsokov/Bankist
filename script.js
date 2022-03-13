@@ -296,6 +296,26 @@ btnClose.addEventListener('click', function (b) {
 
 // /Close account
 
+// Sort and UnSort
+
+let bool = 1;
+
+btnSort.addEventListener('click', function (arr) {
+  // b.preventDefault();
+
+  if (bool) {
+    kirganUser.movements.sort((a, b) => a - b);
+    bool = 0;
+  } else {
+    kirganUser.movements = [...movements];
+    bool = 1;
+  }
+
+  ekrangaTranzaksiyalarniChiqarish(kirganUser);
+});
+
+// /Sort and UnSort
+
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
